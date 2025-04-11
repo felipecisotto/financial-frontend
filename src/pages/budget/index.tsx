@@ -66,7 +66,8 @@ export default function Budgets() {
                     onPaginationChange={setPagination}
                     pagination={pagination}
                     onFilterChange={onFilterChange}
-                    filterFields={["description", "status"]} />
+                // filterFields={["description", "status"]} 
+                />
             )}
         </>
     )
