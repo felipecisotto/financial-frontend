@@ -134,8 +134,9 @@ export function DataTable<TData, TValue>({
     }
 
     const handleRemoveFilter = (key: string) => {
+      const filterKey = options.find((row) => row.name === key)!.id as string
       const updatedFilters = { ...filters }
-      delete updatedFilters[key]
+      delete updatedFilters[filterKey]
       setFilters(updatedFilters)
       const updatedFiltersBadges = { ...filterBadges }
       delete updatedFiltersBadges[key]
@@ -147,7 +148,7 @@ export function DataTable<TData, TValue>({
         <div className="flex w-full items-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-9 border-dashed rounded-r-none">
+              <Button variant="outline" size="sm" className="h-12 w-40 border-dashed rounded-r-none text-left">
                 <PlusCircleIcon className="mr-2 h-4 w-4" />
                 {selectedColumn ? selectedColumn.name : "Adicionar filtro"}
               </Button>
@@ -172,7 +173,7 @@ export function DataTable<TData, TValue>({
               onValueChange={handleAddFilter}
               value={filters[selectedColumn.id as string] || ""}
             >
-              <SelectTrigger className="w-[400px] h-9 rounded-l-none">
+              <SelectTrigger className="w-[400px] min-h-12 rounded-l-none">
                 <SelectValue placeholder={`Selecione ${selectedColumn.name}`} />
               </SelectTrigger>
               <SelectContent>
@@ -191,7 +192,7 @@ export function DataTable<TData, TValue>({
               onKeyDown={handleInputKeyDown}
               disabled={!selectedColumn}
               placeholder="Digite o valor"
-              className="h-9 w-[400px] rounded-l-none"
+              className="h-12 w-[400px] rounded-l-none"
             />
           )}
         </div>
