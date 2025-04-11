@@ -15,6 +15,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  PlusCircleIcon,
 } from "lucide-react"
 
 import {
@@ -35,11 +36,35 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 import { Input } from "./input"
 import { Button } from "./button"
 import { Separator } from "./separator"
-import { useEffect, useMemo, useState } from "react"
+import { useState } from "react"
 import { Badge } from "./badge"
+import { TableSkeleton } from "@/lib/table-utils"
+
+
+type ColumnOption<TData> = {
+  id: keyof TData
+  name: string
+  options?: {
+    key: string,
+    value: string
+  }[]
+}
+
+interface DataTableAdvancedFilterProps<TData> {
+  options: ColumnOption<TData>[]
+  setFilters: (filters: Record<string, string>) => void
+  filters: Record<string, string>
+}
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -47,7 +72,8 @@ interface DataTableProps<TData, TValue> {
   pageCount: number
   pagination: PaginationState
   onPaginationChange: OnChangeFn<PaginationState>
-  onFilterChange: (filters: Record<string, string>) => void
+  filtersOptions: DataTableAdvancedFilterProps<TData>,
+  isLoading?: boolean
 }
 
 export function DataTable<TData, TValue>({
@@ -56,7 +82,8 @@ export function DataTable<TData, TValue>({
   pageCount,
   pagination,
   onPaginationChange,
-  onFilterChange,
+  filtersOptions,
+  isLoading
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -68,89 +95,127 @@ export function DataTable<TData, TValue>({
     onPaginationChange,
     state: {
       pagination,
-    },
+    }
   })
+  const [filterBadges, setFilterBadges] = useState<Record<string, string>>({})
 
-  const FilterInput = () => {
-
-    // 🧠 Filtro genérico
-    const filterableColumns = useMemo(() => {
-      return columns.filter(
-        (col): col is ColumnDef<TData, TValue> & { accessorKey: string } =>
-          typeof col === "object" &&
-          "accessorKey" in col &&
-          typeof col.accessorKey === "string"
-      )
-    }, [columns])
-
-    const [selectedColumn, setSelectedColumn] = useState<string | null>(null)
+  function DataTableAdvancedFilter<TData>({
+    options,
+    setFilters,
+    filters
+  }: DataTableAdvancedFilterProps<TData>) {
+    const [selectedColumn, setSelectedColumn] = useState<ColumnOption<TData> | null>(null)
     const [inputValue, setInputValue] = useState("")
 
-    const handleInputChange = (value: string) => {
-      setInputValue(value)
+
+    const handleAddFilter = (value: string) => {
+      if (!selectedColumn) return
+
+      const updatedFilters = {
+        ...filters,
+        [selectedColumn.id as string]: value,
+      }
+
+      const updatedFiltersBadges = {
+        ...filterBadges,
+        [selectedColumn.name]: selectedColumn.options ? selectedColumn.options.find(col => col.key == value)?.value || value : value
+      }
+      console.log(updatedFiltersBadges)
+
+      setFilters(updatedFilters)
+      setFilterBadges(updatedFiltersBadges)
+      setInputValue("")
     }
 
-    // 🧼 limpa input se trocar o campo
-    useEffect(() => {
-      setInputValue("")
-    }, [selectedColumn])
+    const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter" && selectedColumn && inputValue) {
+        handleAddFilter(inputValue)
+      }
+    }
 
-    return <>
-      {filterableColumns.length > 0 && (
-        <div className="flex flex-wrap items-end p-4 border-b border-muted/40">
-          <div className="flex flex-col space-y-1">
-            <label htmlFor="field" className="text-xs text-muted-foreground">
-              Filtrar
-            </label>
+    const handleRemoveFilter = (key: string) => {
+      const updatedFilters = { ...filters }
+      delete updatedFilters[key]
+      setFilters(updatedFilters)
+      const updatedFiltersBadges = { ...filterBadges }
+      delete updatedFiltersBadges[key]
+      setFilterBadges(updatedFiltersBadges)
+    }
+
+    return (
+      <div className="flex flex-col gap-4 pb-4">
+        <div className="flex w-full items-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-9 border-dashed rounded-r-none">
+                <PlusCircleIcon className="mr-2 h-4 w-4" />
+                {selectedColumn ? selectedColumn.name : "Adicionar filtro"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              {options.map((option) => (
+                <DropdownMenuItem
+                  key={String(option.id)}
+                  onClick={() => {
+                    setSelectedColumn(option)
+                    setInputValue("")
+                  }}
+                >
+                  {option.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {selectedColumn?.options ? (
             <Select
-              onValueChange={(value) => setSelectedColumn(value)}
-              value={selectedColumn ?? ""}
+              onValueChange={handleAddFilter}
+              value={filters[selectedColumn.id as string] || ""}
             >
-              <SelectTrigger className="w-[180px] h-8 rounded-r-none">
-                <SelectValue placeholder="Selecionar campo" />
+              <SelectTrigger className="w-[400px] h-9 rounded-l-none">
+                <SelectValue placeholder={`Selecione ${selectedColumn.name}`} />
               </SelectTrigger>
               <SelectContent>
-                {filterableColumns.map((col) => (
-                  <SelectItem key={col.accessorKey} value={col.accessorKey}>
-                    {col.header?.toString() ?? col.accessorKey}
+                {selectedColumn.options.map((opt) => (
+                  <SelectItem key={opt.key} value={opt.key}>
+                    {opt.value}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="flex flex-col space-y-1">
+          ) : (
             <Input
               id="filter"
               value={inputValue}
-              onChange={(e) => handleInputChange(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && selectedColumn) {
-                  onFilterChange({ [selectedColumn]: inputValue })
-                  console.log('ok')
-                }
-              }}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleInputKeyDown}
               disabled={!selectedColumn}
               placeholder="Digite o valor"
-              className="h-9 w-[300px] rounded-l-none"
+              className="h-9 w-[400px] rounded-l-none"
             />
-          </div>
-
-          {selectedColumn && inputValue && (
-            <p className="text-xs text-muted-foreground ml-2 mt-1 align-middle h-8">
-              <Badge className="" variant={"outline"}>{inputValue}</Badge>
-            </p>
           )}
         </div>
-      )}
-    </>
+
+        {Object.entries(filterBadges).length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(filterBadges).map(([key, value]) => (
+              <Badge
+                key={key}
+                variant="outline"
+                className="cursor-pointer"
+                onClick={() => handleRemoveFilter(key)}
+              >
+                {key}: {value}
+              </Badge>
+            ))}
+          </div>
+        )}
+      </div>
+    )
   }
 
-  return (
-    <div className="rounded-md border bg-background text-foreground shadow-sm">
-      {/* 🔍 Área de filtros */}
-      <FilterInput />
-      {/* Tabela */}
+  const ReportComponent = () => {
+    return <>
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -211,10 +276,11 @@ export function DataTable<TData, TValue>({
           ))}
         </TableFooter>
       </Table>
+    </>
+  }
 
-      <Separator />
-
-      {/* Paginação */}
+  const Pagination = () => {
+    return <>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 py-4 text-sm">
         {/* Linhas por página */}
         <div className="flex items-center space-x-2">
@@ -283,6 +349,21 @@ export function DataTable<TData, TValue>({
           </Button>
         </div>
       </div>
-    </div>
+    </>
+  }
+  return (
+    <>
+      <DataTableAdvancedFilter setFilters={filtersOptions.setFilters} options={filtersOptions.options} filters={filtersOptions.filters} />
+      <div className="rounded-md border bg-background text-foreground shadow-sm">
+        {isLoading ? (
+          <TableSkeleton />
+        ) : (
+          <>
+            <ReportComponent />
+            <Separator />
+            <Pagination />
+          </>)}
+      </div >
+    </>
   )
 }

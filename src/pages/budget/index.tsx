@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { Budget } from "@/types/budget";
 import Page from "@/types/page";
 import { PaginationState } from "@tanstack/react-table";
-import { TableSkeleton } from "@/lib/table-utils";
 
 export default function Budgets() {
     const budgetClient = new BudgetClient();
@@ -23,7 +22,7 @@ export default function Budgets() {
         results: []
     } as Page<Budget>);
 
-    const [filters, onFilterChange] = useState({} as Record<string, string>)
+    const [filters, setFilters] = useState({} as Record<string, string>)
 
     const [isLoading, setIsLoading] = useState(true)
 
@@ -57,18 +56,24 @@ export default function Budgets() {
     return (
         <>
             <Title primaryAction={<Link to={"/budget"}>Criar</Link>} value="Budgets" />
-            {isLoading ? (
-                <TableSkeleton />
-            ) : (
-                <DataTable columns={columns({ editAction, deleteAction })}
-                    data={data.results}
-                    pageCount={data.totalPages + 1}
-                    onPaginationChange={setPagination}
-                    pagination={pagination}
-                    onFilterChange={onFilterChange}
-                // filterFields={["description", "status"]} 
-                />
-            )}
+            <DataTable columns={columns({ editAction, deleteAction })}
+                data={data.results}
+                pageCount={data.totalPages + 1}
+                onPaginationChange={setPagination}
+                pagination={pagination}
+                filtersOptions={
+                    {
+                        options:
+                            [
+                                { id: "status", name: "Status", options: [{ key: "active", value: "Ativo" }, { key: "expired", value: "Expirado" }] },
+                                { id: "description", name: "Descrição" }
+                            ],
+                        setFilters,
+                        filters
+                    }
+                }
+                isLoading={isLoading}
+            />
         </>
     )
 }
