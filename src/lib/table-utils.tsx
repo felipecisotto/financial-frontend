@@ -4,7 +4,7 @@ import { ptBR } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
 import { ReactElement } from "react"
 
-type FormatType = "string" | "number" | "date" | "status"
+type FormatType = "string" | "number" | "date" | "status" | "enum"
 
 
 
@@ -23,11 +23,15 @@ function renderStatus(status: string) {
   }
 }
 
-
+interface EnumValues {
+  text: string,
+  variant: "default" | "destructive" | "outline" | "secondary",
+}
 export function createFormattedColumn<T>(
   accessorKey: keyof T,
   header: string,
-  formatType: FormatType
+  formatType: FormatType,
+  enumValues?: Record<string, EnumValues>
 ): ColumnDef<T> {
   return {
     accessorKey: accessorKey as string,
@@ -56,6 +60,10 @@ export function createFormattedColumn<T>(
 
       if (formatType === "status") {
         formattedValue = renderStatus(rawValue as string)
+      }
+
+      if (formatType === "enum" && enumValues) {
+        formattedValue = <Badge variant={enumValues[rawValue as string].variant} className={"capitalize"}>{enumValues[rawValue as string].text}</Badge>
       }
       return (
 
