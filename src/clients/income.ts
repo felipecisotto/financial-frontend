@@ -11,8 +11,23 @@ export default class IncomeClient extends Client {
         return this.instance.post("/api/incomes", budget)
     }
 
-    public get(page: number, limit: number, status: string, description: string): Promise<Page<Income>> {
-        return this.instance.get(`/api/incomes?page=${page}&limit=${limit}${status ? `&status=${status}` : ""}${description ? `&description=${description}` : ""}`).then(({ data }) => data)
+    public async get(page: number, limit: number, type?: string, description?: string): Promise<Page<Income>> {
+        const params: { [key: string]: number | string } = { page, limit };
+
+        if (type) {
+            params.type = type;
+        }
+        if (description) {
+            params.description = description;
+        }
+
+        try {
+            const { data } = await this.instance.get("/api/incomes", { params });
+            return data;
+        } catch (error) {
+            console.error("Erro ao buscar incomes:", error);
+            throw error;
+        }
     }
 
     public delete(id: string): Promise<void> {

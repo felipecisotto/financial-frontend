@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Budget } from "@/types/budget";
 import Page from "@/types/page";
 import { PaginationState } from "@tanstack/react-table";
+import { toast } from "sonner";
 
 export default function Budgets() {
     const budgetClient = new BudgetClient();
@@ -45,7 +46,9 @@ export default function Budgets() {
     }
 
     const deleteAction = async (budget: Budget) => {
-        await budgetClient.delete(budget.id!);
+        await budgetClient.delete(budget.id!)
+            .then(() => toast.success("Receita deletada com sucesso!"))
+            .catch(() => toast.error("Erro ao deletar receita"));;
         getData()
     }
 

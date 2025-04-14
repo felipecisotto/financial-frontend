@@ -19,7 +19,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { EditIcon, MoreHorizontal, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner"
 
 interface Props {
     editAction: () => void
@@ -69,8 +68,6 @@ export default function ReportAction({
                         <AlertDialogAction
                             onClick={() => {
                                 deleteAction()
-                                    .then(() => toast.success("Orçamento deletado com sucesso!"))
-                                    .catch(() => toast.error("Erro ao deletar orçamento"))
                                 setShowAlert(false)
                             }}
                         >

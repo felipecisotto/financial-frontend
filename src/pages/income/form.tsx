@@ -20,7 +20,13 @@ import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 import IncomeClient from "@/clients/income"
 import { IncomeFormSchema } from "@/types/income"
-import { Select,SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
+import { format } from "date-fns"
+import { cn } from "@/lib/utils"
+import { CalendarIcon } from "lucide-react"
+import { ptBR } from "date-fns/locale"
+import { Calendar } from "@/components/ui/calendar"
 
 export function IncomeForm() {
     const incomeClient = new IncomeClient()
@@ -29,6 +35,7 @@ export function IncomeForm() {
         defaultValues: {
             description: "",
             amount: 0,
+            startDate: new Date()
         }
     })
 
@@ -49,6 +56,8 @@ export function IncomeForm() {
                     amount: income.amount,
                     dueDay: income.dueDay,
                     type: income.type,
+                    startDate: income.startDate,
+                    endDate: income.endDate,
                 })
             } catch (err) {
                 console.error("Erro ao buscar orçamento:", err)
@@ -177,12 +186,12 @@ export function IncomeForm() {
                                     </Select>
                                 </FormItem>
                             )} />
-                        {/* <FormField
+                        <FormField
                             control={form.control}
-                            name="endDate"
+                            name="startDate"
                             render={({ field }) => (
                                 <FormItem className="flex flex-col">
-                                    <FormLabel>Data de Vencimento</FormLabel>
+                                    <FormLabel>Inicio</FormLabel>
                                     <Popover>
                                         <PopoverTrigger asChild>
                                             <FormControl>
@@ -214,7 +223,47 @@ export function IncomeForm() {
                                         </PopoverContent>
                                     </Popover>
                                     <FormMessage />
-                                </FormItem> */}
+                                </FormItem>
+                            )} />
+                        <FormField
+                            control={form.control}
+                            name="endDate"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                    <FormLabel>Fim</FormLabel>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <FormControl>
+                                                <Button
+                                                    variant="outline"
+                                                    className={cn(
+                                                        "pl-3 text-left font-normal w-full",
+                                                        !field.value && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    {field.value ? (
+                                                        format(field.value, "PPP", { locale: ptBR })
+                                                    ) : (
+                                                        <span>Escolha uma data</span>
+                                                    )}
+                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar
+                                                mode="single"
+                                                selected={field.value}
+                                                onSelect={field.onChange}
+                                                disabled={(date) => date < new Date()}
+                                                initialFocus
+                                                locale={ptBR}
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
 
 
 

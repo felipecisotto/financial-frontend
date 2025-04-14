@@ -6,6 +6,8 @@ export const IncomeFormSchema = z.object({
     amount: z.coerce.number(),
     type: z.string(),
     dueDay: z.coerce.number().optional(),
+    endDate: z.date().optional(),
+    startDate: z.date()
 });
 
 

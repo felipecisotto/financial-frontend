@@ -12,6 +12,8 @@ export function columns({ editAction, deleteAction }: Props): ColumnDef<Income>[
     return [
         createFormattedColumn<Income>("description", "Descrição", "string"),
         createFormattedColumn<Income>("dueDay", "Recebimento no dia", "string"),
+        createFormattedColumn<Income>("startDate", "Inicio", "date"),
+        createFormattedColumn<Income>("endDate", "Fim", "date"),
         createFormattedColumn<Income>("type", "Tipo", "enum", {
             fixed: {
                 text: "Fixo",

@@ -7,6 +7,7 @@ import { PaginationState } from "@tanstack/react-table";
 import IncomeClient from "@/clients/income";
 import { Income } from "@/types/income";
 import { columns } from "./columns";
+import { toast } from "sonner";
 
 export default function Incomings() {
     const incomeClient = new IncomeClient();
@@ -30,7 +31,7 @@ export default function Incomings() {
 
     function getData() {
         setIsLoading(true)
-        incomeClient.get(pagination.pageIndex + 1, pagination.pageSize, filters['status'], filters['description']).then((page) => {
+        incomeClient.get(pagination.pageIndex + 1, pagination.pageSize, filters['type'], filters['description']).then((page) => {
             setData(page)
             setIsLoading(false)
         }).catch((err) => {
@@ -45,7 +46,9 @@ export default function Incomings() {
     }
 
     const deleteAction = async (income: Income) => {
-        await incomeClient.delete(income.id!);
+        await incomeClient.delete(income.id!)
+            .then(() => toast.success("Receita deletada com sucesso!"))
+            .catch(() => toast.error("Erro ao deletar receita"));
         getData()
     }
 
@@ -58,7 +61,7 @@ export default function Incomings() {
             <Title primaryAction={<Link to={"/income"}>Criar</Link>} value="Receitas" />
             <DataTable columns={columns({ editAction, deleteAction })}
                 data={data.results}
-                pageCount={data.totalPages + 1}
+                pageCount={data.totalPages}
                 onPaginationChange={setPagination}
                 pagination={pagination}
                 filtersOptions={
