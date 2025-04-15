@@ -15,6 +15,8 @@ import { BudgetForm } from './pages/budget/form.tsx'
 import { Toaster } from 'sonner'
 import Incomings from './pages/income/index.tsx'
 import { IncomeForm } from './pages/income/form.tsx'
+import Expenses from './pages/expenses/index.tsx'
+import { ExpenseForm } from './pages/expenses/form.tsx'
 
 
 const Layout = () => {
@@ -27,7 +29,7 @@ const Layout = () => {
               <NavigationMenuLink href='/'>Ínicio</NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <NavigationMenuLink href='/'>Despesas</NavigationMenuLink>
+              <NavigationMenuLink href='/expenses'>Despesas</NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
               <NavigationMenuLink href='/incomes'>Receitas</NavigationMenuLink>
@@ -59,11 +61,11 @@ const router = createBrowserRouter([
       },
 
       {
-        path: "/budget", // Para editar um existente
+        path: "/budget",
         element: <BudgetForm />
       },
       {
-        path: "/budget/:id", // Para editar um existente
+        path: "/budget/:id",
         element: <BudgetForm />
       },
       {
@@ -72,11 +74,23 @@ const router = createBrowserRouter([
       },
       {
         path: "/income/:id",
-        element:<IncomeForm/>
+        element: <IncomeForm />
       },
       {
         path: "/income",
-        element:<IncomeForm/>
+        element: <IncomeForm />
+      },
+      {
+        path: "/expenses",
+        element: <Expenses />
+      },
+      {
+        path: "/expense/:id",
+        element: <ExpenseForm />
+      },
+      {
+        path: "/expense",
+        element: <ExpenseForm />
       }
     ]
   },
