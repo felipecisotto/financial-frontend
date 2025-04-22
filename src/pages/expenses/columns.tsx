@@ -13,6 +13,15 @@ export function columns({ editAction, deleteAction }: Props): ColumnDef<Expense>
         createFormattedColumn<Expense>("description", "Descrição", "string"),
         createFormattedColumn<Expense>("dueDay", "Dia do Pagamento", "string"),
         createFormattedColumn<Expense>("installments", "Parcelas", "string"),
+        {
+            header: "Budget",
+            cell: ({ row }) => {
+                const budget = row.original.budget;
+                return <div className={`truncate overflow-hidden whitespace-nowrap text-left max-w-[180px]`}>
+                    {budget?.description || "-"}
+                </div>
+            },
+        },
         createFormattedColumn<Expense>("startDate", "Inicio", "date"),
         createFormattedColumn<Expense>("endDate", "Fim", "date"),
         createFormattedColumn<Expense>("type", "Tipo", "enum", {

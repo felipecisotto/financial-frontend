@@ -1,6 +1,5 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
 import {
     Form,
     FormControl,
@@ -9,6 +8,18 @@ import {
     FormLabel,
     FormMessage
 } from "@/components/ui/form"
+import { Check, ChevronsUpDown } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command"
+
 import { Input } from "@/components/ui/input"
 import Title from "@/components/ui/title"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -27,9 +38,14 @@ import { ptBR } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
 import ExpenseClient from "@/clients/expense"
 import { ExpenseFormSchema } from "@/types/expense"
+import BudgetClient from "@/clients/budget"
+import { Budget } from "@/types/budget"
 
 export function ExpenseForm() {
     const expenseClient = new ExpenseClient()
+    const budgetClient = new BudgetClient();
+    const [budgets, setBudgets] = useState([] as Budget[])
+
     const form = useForm<z.infer<typeof ExpenseFormSchema>>({
         resolver: zodResolver(ExpenseFormSchema),
         defaultValues: {
@@ -48,17 +64,12 @@ export function ExpenseForm() {
     useEffect(() => {
         if (!id) return
 
-        const fetchBudget = async () => {
+        const fetchExpense = async () => {
             setIsLoading(true)
             try {
                 const income = await expenseClient.findById(id)
                 form.reset({
-                    description: income.description,
-                    amount: income.amount,
-                    dueDay: income.dueDay,
-                    type: income.type,
-                    startDate: income.startDate,
-                    endDate: income.endDate,
+                    ...income
                 })
             } catch (err) {
                 console.error("Erro ao buscar orçamento:", err)
@@ -67,8 +78,12 @@ export function ExpenseForm() {
             }
         }
 
-        fetchBudget()
+        fetchExpense()
     }, [id, form])
+
+    useEffect(() => {
+        budgetClient.get(1, 1000, "active", "").then((budgetsPage) => setBudgets(budgetsPage.results))
+    },[])
 
     async function onSubmit(values: z.infer<typeof ExpenseFormSchema>) {
         try {
@@ -79,7 +94,7 @@ export function ExpenseForm() {
                 await expenseClient.create(values)
                 toast.success("Receita criada com sucesso!")
             }
-            navigate("/incomes")
+            navigate("/expenses")
         } catch (err) {
             toast.error("Erro ao salvar a receita. Verifique os dados.")
             console.error(err)
@@ -98,6 +113,17 @@ export function ExpenseForm() {
     }, [watchType, form]);
 
 
+    const watchMetod = form.watch("method")
+
+
+    useEffect(() => {
+        if (watchMetod === "credit_card") {
+            form.register("installments");
+            form.setValue("installments", 1)
+        } else {
+            form.unregister("installments");
+        }
+    }, [watchMetod, form]);
 
     return (
 
@@ -220,6 +246,109 @@ export function ExpenseForm() {
                                         </Select>
                                     </FormItem>
                                 )} /> : ""}
+                        <FormField
+                            control={form.control}
+                            name="method"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Método de Pagamento</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder={"Selecione o método de pagamento"} />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="pix">Pix</SelectItem>
+                                            <SelectItem value="credit_card">Cartão de Crédito</SelectItem>
+                                            <SelectItem value="bank_slip">Boleto bancário</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </FormItem>
+                            )} />
+                        {watchMetod == "credit_card" ?
+                            <FormField
+                                control={form.control}
+                                name="installments"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Parcelas</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="number"
+                                                max={31}
+                                                step={1}
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                            : null}
+
+                        <FormField
+                            control={form.control}
+                            name="budgetId"
+                            render={({ field }) => {
+                                return (
+                                    <FormItem>
+                                        <FormLabel>Orçamento</FormLabel>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <FormControl>
+                                                    <Button
+                                                        variant="outline"
+                                                        role="combobox"
+                                                        className={cn(
+                                                            "w-[200px] justify-between",
+                                                            !field.value && "text-muted-foreground"
+                                                        )}
+                                                    >
+                                                        {field.value
+                                                            ? budgets.find(
+                                                                (budget) => budget.id === field.value
+                                                            )?.description
+                                                            : "Selecione o Budget"}
+                                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                    </Button>
+                                                </FormControl>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-[200px] p-0">
+                                                <Command>
+                                                    <CommandInput placeholder="Procure o orçamento..." />
+                                                    <CommandList>
+                                                        <CommandEmpty>Orçamentos não encontrados</CommandEmpty>
+                                                        <CommandGroup>
+                                                            {budgets.map((budget) => (
+                                                                <CommandItem
+                                                                    value={budget.description}
+                                                                    key={budget.id}
+                                                                    onSelect={() => {
+                                                                        form.setValue("budgetId", budget.id)
+                                                                    }}
+                                                                >
+                                                                    {budget.description}
+                                                                    <Check
+                                                                        className={cn(
+                                                                            "ml-auto",
+                                                                            budget.id === field.value
+                                                                                ? "opacity-100"
+                                                                                : "opacity-0"
+                                                                        )}
+                                                                    />
+                                                                </CommandItem>
+                                                            ))}
+                                                        </CommandGroup>
+                                                    </CommandList>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
+                                        <FormMessage />
+                                    </FormItem>
+                                )
+                            }} />
+
                         <FormField
                             control={form.control}
                             name="startDate"

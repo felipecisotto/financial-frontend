@@ -40,6 +40,9 @@ export function createFormattedColumn<T>(
       const rawValue = row.getValue(accessorKey as string)
       let formattedValue: string | ReactElement = String(rawValue)
 
+      if (rawValue === null || rawValue === undefined) {
+        formattedValue = "-"
+      }
       if (formatType === "number") {
         const parsed = parseFloat(String(rawValue))
         formattedValue = new Intl.NumberFormat("pt-BR", {
@@ -62,8 +65,8 @@ export function createFormattedColumn<T>(
         formattedValue = renderStatus(rawValue as string)
       }
 
-      if (formatType === "enum" && enumValues) {
-        formattedValue = <Badge variant={enumValues[rawValue as string].variant} className={"capitalize"}>{enumValues[rawValue as string].text}</Badge>
+      if (formatType === "enum" && enumValues && rawValue !== null) {
+        formattedValue = <Badge variant={enumValues[rawValue as string]?.variant} className={"capitalize"}>{enumValues[rawValue as string].text}</Badge>
       }
       return (
 

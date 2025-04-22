@@ -1,10 +1,11 @@
 import { z } from 'zod';
+import { BugdgetFormSchema } from './budget';
 
 
 export const ExpenseFormSchema = z.object({
     id: z.string().optional(),
     description: z.string(),
-    amount: z.number(),
+    amount: z.coerce.number(),
     type: z.string(),
     budgetId: z.string().optional(),
     recurrency: z.string().optional(),
@@ -13,6 +14,7 @@ export const ExpenseFormSchema = z.object({
     dueDay: z.coerce.number(),
     startDate: z.date(),
     endDate: z.date().optional(),
+    budget: BugdgetFormSchema.optional(),
 });
 
 export type Expense = z.infer<typeof ExpenseFormSchema>;
