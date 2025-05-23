@@ -6,8 +6,7 @@ export default class Client {
   public readonly instance: AxiosInstance;
 
   public constructor() {
-    // const baseURL = 'http://localhost:8080'
-    const baseURL = 'https://api.felipecisotto.com.br/financial'
+    const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
     this.instance = axios.create({ baseURL });
     this.instance.interceptors.request.use((options) => {
       const nConfig = { ...options };
