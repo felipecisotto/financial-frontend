@@ -58,7 +58,7 @@ function CardSkeleton(): ReactElement {
 
 export function SectionCards(): ReactElement {
     const [isCardsLoading, setIsCardsLoading] = useState(true);
-    const [summary, setSummary] = useState<MonthSummary>({});
+    const [summary, setSummary] = useState<MonthSummary>({} as MonthSummary);
     
     const dashboard = new DashboardClient()
     

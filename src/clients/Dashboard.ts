@@ -19,6 +19,6 @@ export default class DashboardClient extends Client {
                 remaining: (budget.usage / budget.amount) * 100,
             }))
                 .filter((budget: BudgetUsage) => budget.remaining > 0)
-                .sort((a, b) => b.remaining - a.remaining))
+                .sort((a: BudgetUsage, b: BudgetUsage) => b.remaining - a.remaining))
     }
 }
