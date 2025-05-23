@@ -9,12 +9,11 @@ RUN bun install --frozen-lockfile
 RUN bun run build
 
 # Etapa de produção
-FROM oven/bun:1.1.13 as production
+FROM node:20-alpine as production
 
 WORKDIR /app
 
-# Instale o 'serve' para servir arquivos estáticos
-RUN bun add -g serve
+RUN npm install -g serve
 
 COPY --from=builder /app/dist ./dist
 
