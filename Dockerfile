@@ -32,4 +32,4 @@ RUN bun install --frozen-lockfile --production
 EXPOSE 3000
 
 # Start the application using a static file server
-CMD ["bun", "run", "preview", "--host", "0.0.0.0", "--port", "3000"] 
+CMD ["bun", "run", "preview", "--host", "0.0.0.0", "--port", "3000"]
