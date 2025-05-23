@@ -17,6 +17,7 @@ import Incomings from './pages/income/index.tsx'
 import { IncomeForm } from './pages/income/form.tsx'
 import Expenses from './pages/expenses/index.tsx'
 import { ExpenseForm } from './pages/expenses/form.tsx'
+import { PWAProvider } from './components/PWAProvider'
 
 
 const Layout = () => {
@@ -98,7 +99,9 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={router} />
-    <Toaster richColors position="top-right" />
+    <PWAProvider>
+      <RouterProvider router={router} />
+      <Toaster richColors position="top-right" />
+    </PWAProvider>
   </StrictMode>,
 )
