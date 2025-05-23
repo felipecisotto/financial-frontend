@@ -1,35 +1,23 @@
-# Build stage
-FROM oven/bun:1 AS builder
+# Etapa de build
+FROM oven/bun:1.1.13 as builder
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json bun.lock ./
-
-# Install dependencies
-RUN bun install --frozen-lockfile
-
-# Copy source code
 COPY . .
 
-# Build the application
+RUN bun install --frozen-lockfile
 RUN bun run build
 
-# Production stage
-FROM oven/bun:1-slim
+# Etapa de produção
+FROM oven/bun:1.1.13 as production
 
 WORKDIR /app
 
-# Copy built assets from builder
+# Instale o 'serve' para servir arquivos estáticos
+RUN bun add -g serve
+
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/bun.lock ./
 
-# Install only production dependencies
-RUN bun install --frozen-lockfile --production
-
-# Expose the port your app runs on
 EXPOSE 3000
 
-# Start the application using a static file server
-CMD ["bun", "run", "preview"]
+CMD ["serve", "-s", "dist", "-l", "3000"]
