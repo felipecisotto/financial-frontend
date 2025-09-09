@@ -1,6 +1,6 @@
 import {z} from "zod"
 
-export const BugdgetFormSchema = z.object({
+export const BudgetFormSchema = z.object({
     id: z.string().uuid().optional(),
     description: z.string(),
     amount: z.coerce.number(),
@@ -15,4 +15,4 @@ export type BudgetUsage = {
     remaining: number,
 }
 
-export type Budget = z.infer<typeof BugdgetFormSchema>;
+export type Budget = z.infer<typeof BudgetFormSchema>;
