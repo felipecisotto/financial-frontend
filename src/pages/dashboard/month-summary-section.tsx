@@ -6,30 +6,29 @@ import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent, } from "@/components/ui/chart"
 import { Skeleton } from '@/components/ui/skeleton.tsx';
-import { useState } from "react"
-
-const chartData = [
-    { month: "January", desktop: 186, mobile: 80 },
-    { month: "February", desktop: 305, mobile: 200 },
-    { month: "March", desktop: 237, mobile: 120 },
-    { month: "April", desktop: 73, mobile: 190 },
-    { month: "May", desktop: 209, mobile: 130 },
-    { month: "June", desktop: 214, mobile: 140 },
-]
-
-const chartConfig = {
-    desktop: {
-        label: "Desktop",
-        color: "var(--chart-1)",
-    },
-    mobile: {
-        label: "Mobile",
-        color: "var(--chart-2)",
-    },
-} satisfies ChartConfig
-
+import { useState, useMemo } from "react"
 
 function Content(): React.ReactElement {
+    // Memoize static chart data and config to prevent recreation
+    const chartData = useMemo(() => [
+        { month: "January", desktop: 186, mobile: 80 },
+        { month: "February", desktop: 305, mobile: 200 },
+        { month: "March", desktop: 237, mobile: 120 },
+        { month: "April", desktop: 73, mobile: 190 },
+        { month: "May", desktop: 209, mobile: 130 },
+        { month: "June", desktop: 214, mobile: 140 },
+    ], []);
+
+    const chartConfig = useMemo(() => ({
+        desktop: {
+            label: "Desktop",
+            color: "var(--chart-1)",
+        },
+        mobile: {
+            label: "Mobile",
+            color: "var(--chart-2)",
+        },
+    } satisfies ChartConfig), []);
     return <div
         className="*:data-[slot=card]:shadow-xs px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card lg:px-6">
         <Card>

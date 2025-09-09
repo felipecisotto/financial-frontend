@@ -1,5 +1,6 @@
 "use client"
 
+import { memo } from "react";
 import { Button } from "@/components/ui/button"
 import {
     Form,
@@ -15,10 +16,10 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { useNavigate, useParams } from "react-router-dom"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
-import IncomeClient from "@/clients/income"
+import { incomeClient } from "@/lib/api-clients"
 import { IncomeFormSchema } from "@/types/income"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
@@ -28,8 +29,7 @@ import { CalendarIcon } from "lucide-react"
 import { ptBR } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
 
-export function IncomeForm() {
-    const incomeClient = new IncomeClient()
+function IncomeForm() {
     const form = useForm<z.infer<typeof IncomeFormSchema>>({
         resolver: zodResolver(IncomeFormSchema),
         defaultValues: {
@@ -69,7 +69,7 @@ export function IncomeForm() {
         fetchBudget()
     }, [id, form])
 
-    async function onSubmit(values: z.infer<typeof IncomeFormSchema>) {
+    const onSubmit = useCallback(async (values: z.infer<typeof IncomeFormSchema>) => {
         try {
             if (isEdit) {
                 await incomeClient.update(id!, values)
@@ -83,7 +83,7 @@ export function IncomeForm() {
             toast.error("Erro ao salvar a receita. Verifique os dados.")
             console.error(err)
         }
-    }
+    }, [id, isEdit, navigate]);
 
 
 
@@ -282,3 +282,5 @@ export function IncomeForm() {
         </div>
     )
 }
+
+export default memo(IncomeForm);
