@@ -1,19 +1,18 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, Link, Outlet, RouterProvider } from 'react-router-dom'
 import Dashboard from './pages/dashboard/index.tsx'
 import { ThemeProvider } from './components/theme-provider'
 import {
   NavigationMenu,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu"
 import Budgets from './pages/budget/index.tsx'
 import BudgetForm from './pages/budget/form.tsx'
 import { Toaster } from 'sonner'
-import Incomings from './pages/income/index.tsx'
+import Incomes from './pages/income/index.tsx'
 import IncomeForm from './pages/income/form.tsx'
 import Expenses from './pages/expenses/index.tsx'
 import ExpenseForm from './pages/expenses/form.tsx'
@@ -27,16 +26,16 @@ const Layout = () => {
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
-              <NavigationMenuLink href='/'>Ínicio</NavigationMenuLink>
+              <Link to="/" className="navigation-menu-link">Ínicio</Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <NavigationMenuLink href='/expenses'>Despesas</NavigationMenuLink>
+              <Link to="/expenses" className="navigation-menu-link">Despesas</Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <NavigationMenuLink href='/incomes'>Receitas</NavigationMenuLink>
+              <Link to="/incomes" className="navigation-menu-link">Receitas</Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <NavigationMenuLink href='/budgets'>Budgets</NavigationMenuLink>
+              <Link to="/budgets" className="navigation-menu-link">Budgets</Link>
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
@@ -71,7 +70,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/incomes",
-        element: <Incomings />
+        element: <Incomes />
       },
       {
         path: "/income/:id",

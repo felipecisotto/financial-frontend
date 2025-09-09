@@ -1,7 +1,4 @@
-"use client"
-
 import { memo } from "react";
-import { budgetClient } from "@/lib/api-clients"
 import { Button } from "@/components/ui/button"
 import {
     Form,
@@ -13,12 +10,6 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import Title from "@/components/ui/title"
-import { BugdgetFormSchema } from "@/types/budget"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { useNavigate, useParams } from "react-router-dom"
-import { useEffect, useState, useCallback } from "react"
 import {
     Popover,
     PopoverContent,
@@ -29,61 +20,11 @@ import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useBudgetForm } from "@/hooks/useBudgetForm"
 
 function BudgetForm() {
-    const form = useForm<z.infer<typeof BugdgetFormSchema>>({
-        resolver: zodResolver(BugdgetFormSchema),
-        defaultValues: {
-            description: "",
-            amount: 0,
-            status: "active"
-        }
-    })
-
-    const { id } = useParams()
-    const isEdit = Boolean(id)
-    const navigate = useNavigate()
-    const [isLoading, setIsLoading] = useState(false)
-
-    useEffect(() => {
-        if (!id) return
-
-        const fetchBudget = async () => {
-            setIsLoading(true)
-            try {
-                const budget = await budgetClient.findById(id)
-                form.reset({
-                    description: budget.description,
-                    amount: budget.amount,
-                    endDate: budget.endDate,
-                })
-            } catch (err) {
-                console.error("Erro ao buscar orçamento:", err)
-            } finally {
-                setIsLoading(false)
-            }
-        }
-
-        fetchBudget()
-    }, [id, form])
-
-    const onSubmit = useCallback(async (values: z.infer<typeof BugdgetFormSchema>) => {
-        try {
-            if (isEdit) {
-                await budgetClient.update(id!, values)
-                toast.success("Orçamento atualizado com sucesso!")
-            } else {
-                await budgetClient.create(values)
-                toast.success("Orçamento criado com sucesso!")
-            }
-            navigate("/budgets")
-        } catch (err) {
-            toast.error("Erro ao salvar o orçamento. Verifique os dados.")
-            console.error(err)
-        }
-    }, [id, isEdit, navigate]);
+    const { form, isEdit, isLoading, onSubmit } = useBudgetForm()
 
 
 

@@ -9,7 +9,7 @@ import { Income } from "@/types/income";
 import { columns } from "./columns";
 import { toast } from "sonner";
 
-export default function Incomings() {
+export default function Incomes() {
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,
