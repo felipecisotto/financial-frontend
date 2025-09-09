@@ -1,8 +1,9 @@
+import { memo } from "react";
 import {BudgetUtilizationSection} from "./budget-utilization-section";
 import {MonthSummarySection} from "./month-summary-section";
 import {SectionCards} from "./section-cards";
 
-export default function Dashboard() {
+function Dashboard() {
     return (
         <div className="flex flex-1 flex-col">
             <div className="@container/main flex flex-1 flex-col gap-2">
@@ -15,3 +16,5 @@ export default function Dashboard() {
         </div>
     )
 }
+
+export default memo(Dashboard);

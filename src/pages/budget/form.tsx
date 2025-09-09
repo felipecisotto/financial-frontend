@@ -1,6 +1,7 @@
 "use client"
 
-import BudgetClient from "@/clients/budget"
+import { memo } from "react";
+import { budgetClient } from "@/lib/api-clients"
 import { Button } from "@/components/ui/button"
 import {
     Form,
@@ -17,7 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { useNavigate, useParams } from "react-router-dom"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import {
     Popover,
     PopoverContent,
@@ -31,8 +32,7 @@ import { ptBR } from "date-fns/locale"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 
-export function BudgetForm() {
-    const budgetClient = new BudgetClient()
+function BudgetForm() {
     const form = useForm<z.infer<typeof BugdgetFormSchema>>({
         resolver: zodResolver(BugdgetFormSchema),
         defaultValues: {
@@ -69,7 +69,7 @@ export function BudgetForm() {
         fetchBudget()
     }, [id, form])
 
-    async function onSubmit(values: z.infer<typeof BugdgetFormSchema>) {
+    const onSubmit = useCallback(async (values: z.infer<typeof BugdgetFormSchema>) => {
         try {
             if (isEdit) {
                 await budgetClient.update(id!, values)
@@ -83,7 +83,7 @@ export function BudgetForm() {
             toast.error("Erro ao salvar o orçamento. Verifique os dados.")
             console.error(err)
         }
-    }
+    }, [id, isEdit, navigate]);
 
 
 
@@ -206,3 +206,5 @@ export function BudgetForm() {
         </div>
     )
 }
+
+export default memo(BudgetForm);

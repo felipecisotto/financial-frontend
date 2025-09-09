@@ -11,12 +11,12 @@ import {
   NavigationMenuList,
 } from "@/components/ui/navigation-menu"
 import Budgets from './pages/budget/index.tsx'
-import { BudgetForm } from './pages/budget/form.tsx'
+import BudgetForm from './pages/budget/form.tsx'
 import { Toaster } from 'sonner'
 import Incomings from './pages/income/index.tsx'
-import { IncomeForm } from './pages/income/form.tsx'
+import IncomeForm from './pages/income/form.tsx'
 import Expenses from './pages/expenses/index.tsx'
-import { ExpenseForm } from './pages/expenses/form.tsx'
+import ExpenseForm from './pages/expenses/form.tsx'
 import { PWAProvider } from './components/PWAProvider'
 
 

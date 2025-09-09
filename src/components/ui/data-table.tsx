@@ -46,10 +46,28 @@ import {
 import { Input } from "./input"
 import { Button } from "./button"
 import { Separator } from "./separator"
-import { useState } from "react"
+import { useState, memo, useMemo, useCallback } from "react"
 import { Badge } from "./badge"
 import { TableSkeleton } from "@/lib/table-utils"
 
+// Memoized table components for better performance
+const MemoizedTableCell = memo(({ cell }: { cell: unknown }) => (
+  <TableCell key={(cell as any).id} className="px-3 py-2">
+    {flexRender((cell as any).column.columnDef.cell, (cell as any).getContext())}
+  </TableCell>
+));
+
+const MemoizedTableRow = memo(({ row }: { row: unknown }) => (
+  <TableRow
+    key={(row as any).id}
+    data-state={(row as any).getIsSelected() && "selected"}
+    className="border-b border-muted/30 hover:bg-muted/10 transition-colors"
+  >
+    {(row as any).getVisibleCells().map((cell: unknown) => (
+      <MemoizedTableCell key={(cell as any).id} cell={cell} />
+    ))}
+  </TableRow>
+));
 
 type ColumnOption<TData> = {
   id: keyof TData
@@ -76,7 +94,7 @@ interface DataTableProps<TData, TValue> {
   isLoading?: boolean
 }
 
-export function DataTable<TData, TValue>({
+function DataTable<TData, TValue>({
   columns,
   data,
   pageCount,
@@ -85,7 +103,8 @@ export function DataTable<TData, TValue>({
   filtersOptions,
   isLoading
 }: DataTableProps<TData, TValue>) {
-  const table = useReactTable({
+  // Memoize table configuration to prevent recreation
+  const tableConfig = useMemo(() => ({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -96,7 +115,9 @@ export function DataTable<TData, TValue>({
     state: {
       pagination,
     }
-  })
+  }), [data, columns, pageCount, onPaginationChange, pagination]);
+
+  const table = useReactTable(tableConfig)
   const [filterBadges, setFilterBadges] = useState<Record<string, string>>({})
 
   function DataTableAdvancedFilter<TData>({
@@ -108,7 +129,7 @@ export function DataTable<TData, TValue>({
     const [inputValue, setInputValue] = useState("")
 
 
-    const handleAddFilter = (value: string) => {
+    const handleAddFilter = useCallback((value: string) => {
       if (!selectedColumn) return
 
       const updatedFilters = {
@@ -120,20 +141,19 @@ export function DataTable<TData, TValue>({
         ...filterBadges,
         [selectedColumn.name]: selectedColumn.options ? selectedColumn.options.find(col => col.key == value)?.value || value : value
       }
-      console.log(updatedFiltersBadges)
 
       setFilters(updatedFilters)
       setFilterBadges(updatedFiltersBadges)
       setInputValue("")
-    }
+    }, [selectedColumn, filters, setFilters]);
 
-    const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleInputKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter" && selectedColumn && inputValue) {
         handleAddFilter(inputValue)
       }
-    }
+    }, [selectedColumn, inputValue, handleAddFilter]);
 
-    const handleRemoveFilter = (key: string) => {
+    const handleRemoveFilter = useCallback((key: string) => {
       const filterKey = options.find((row) => row.name === key)!.id as string
       const updatedFilters = { ...filters }
       delete updatedFilters[filterKey]
@@ -141,7 +161,7 @@ export function DataTable<TData, TValue>({
       const updatedFiltersBadges = { ...filterBadges }
       delete updatedFiltersBadges[key]
       setFilterBadges(updatedFiltersBadges)
-    }
+    }, [options, filters, setFilters]);
 
     return (
       <div className="flex flex-col gap-4 pb-4">
@@ -215,9 +235,8 @@ export function DataTable<TData, TValue>({
     )
   }
 
-  const ReportComponent = () => {
-    return <>
-      <Table>
+  const ReportComponent = useMemo(() => (
+    <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="border-b border-muted/40">
@@ -240,17 +259,7 @@ export function DataTable<TData, TValue>({
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                className="border-b border-muted/30 hover:bg-muted/10 transition-colors"
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="px-3 py-2">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
+              <MemoizedTableRow key={row.id} row={row} />
             ))
           ) : (
             <TableRow>
@@ -276,12 +285,10 @@ export function DataTable<TData, TValue>({
             </TableRow>
           ))}
         </TableFooter>
-      </Table>
-    </>
-  }
+    </Table>
+  ), [table, columns]);
 
-  const Pagination = () => {
-    return <>
+  const Pagination = useMemo(() => (
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 py-4 text-sm">
         {/* Linhas por página */}
         <div className="flex items-center space-x-2">
@@ -350,8 +357,7 @@ export function DataTable<TData, TValue>({
           </Button>
         </div>
       </div>
-    </>
-  }
+  ), [table]);
   return (
     <>
       <DataTableAdvancedFilter setFilters={filtersOptions.setFilters} options={filtersOptions.options} filters={filtersOptions.filters} />
@@ -360,11 +366,15 @@ export function DataTable<TData, TValue>({
           <TableSkeleton />
         ) : (
           <>
-            <ReportComponent />
+            {ReportComponent}
             <Separator />
-            <Pagination />
+            {Pagination}
           </>)}
       </div >
     </>
   )
 }
+
+// Export memoized DataTable with proper typing
+export const DataTableMemo = memo(DataTable) as typeof DataTable;
+export { DataTableMemo as DataTable };

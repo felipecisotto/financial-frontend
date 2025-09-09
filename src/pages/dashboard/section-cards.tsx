@@ -1,11 +1,24 @@
 import { Card, CardDescription, CardHeader, CardTitle, } from "@/components/ui/card"
 import { Skeleton } from '@/components/ui/skeleton.tsx';
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState, useMemo } from 'react';
 import MonthSummary from '@/types/MonthSummary.ts';
-import DashboardClient from '@/clients/Dashboard.ts';
+import { dashboardClient } from '@/lib/api-clients';
 import { toast } from 'sonner';
 
 function Content({ data }: { data: MonthSummary }) {
+    // Memoize formatter to avoid creating new instance on each render
+    const currencyFormatter = useMemo(() => new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+    }), []);
+
+    // Memoize formatted values
+    const formattedData = useMemo(() => ({
+        totalIncome: currencyFormatter.format(data.totalIncome),
+        totalExpense: currencyFormatter.format(data.totalExpense),
+        totalRemaining: currencyFormatter.format(data.totalRemaining)
+    }), [data.totalIncome, data.totalExpense, data.totalRemaining, currencyFormatter]);
+
     return (
         <div
             className="*:data-[slot=card]:shadow-xs @xl/main:grid-cols-3 @5xl/main:grid-cols-3 grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card lg:px-6">
@@ -13,10 +26,7 @@ function Content({ data }: { data: MonthSummary }) {
                 <CardHeader className="relative">
                     <CardDescription>Receita do mês</CardDescription>
                     <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-                        {new Intl.NumberFormat("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
-                        }).format(data.totalIncome)}
+                        {formattedData.totalIncome}
                     </CardTitle>
                 </CardHeader>
             </Card>
@@ -24,10 +34,7 @@ function Content({ data }: { data: MonthSummary }) {
                 <CardHeader className="relative">
                     <CardDescription>Despesas do mês</CardDescription>
                     <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-                        {new Intl.NumberFormat("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
-                        }).format(data.totalExpense)}
+                        {formattedData.totalExpense}
                     </CardTitle>
                 </CardHeader>
             </Card>
@@ -35,10 +42,7 @@ function Content({ data }: { data: MonthSummary }) {
                 <CardHeader className="relative">
                     <CardDescription>Disponivel</CardDescription>
                     <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-                        {new Intl.NumberFormat("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
-                        }).format(data.totalRemaining)}
+                        {formattedData.totalRemaining}
                     </CardTitle>
                 </CardHeader>
             </Card>
@@ -60,11 +64,9 @@ export function SectionCards(): ReactElement {
     const [isCardsLoading, setIsCardsLoading] = useState(true);
     const [summary, setSummary] = useState<MonthSummary>({} as MonthSummary);
 
-    const dashboard = new DashboardClient()
-
     useEffect(() => {
         const date = new Date()
-        dashboard.getMonthSummary(date.getMonth(), date.getFullYear()).then((data) => {
+        dashboardClient.getMonthSummary(date.getMonth(), date.getFullYear()).then((data) => {
             setSummary(data)
             setIsCardsLoading(false)
         }).catch(() => {

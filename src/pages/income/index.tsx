@@ -4,13 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Page from "@/types/page";
 import { PaginationState } from "@tanstack/react-table";
-import IncomeClient from "@/clients/income";
+import { incomeClient } from "@/lib/api-clients";
 import { Income } from "@/types/income";
 import { columns } from "./columns";
 import { toast } from "sonner";
 
 export default function Incomings() {
-    const incomeClient = new IncomeClient();
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,

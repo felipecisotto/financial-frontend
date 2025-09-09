@@ -1,5 +1,6 @@
 "use client"
 
+import { memo } from "react";
 import {
     Form,
     FormControl,
@@ -26,7 +27,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { useNavigate, useParams } from "react-router-dom"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -36,14 +37,11 @@ import { cn } from "@/lib/utils"
 import { CalendarIcon } from "lucide-react"
 import { ptBR } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
-import ExpenseClient from "@/clients/expense"
+import { expenseClient, budgetClient } from "@/lib/api-clients"
 import { ExpenseFormSchema } from "@/types/expense"
-import BudgetClient from "@/clients/budget"
 import { Budget } from "@/types/budget"
 
-export function ExpenseForm() {
-    const expenseClient = new ExpenseClient()
-    const budgetClient = new BudgetClient();
+function ExpenseForm() {
     const [budgets, setBudgets] = useState([] as Budget[])
 
     const form = useForm<z.infer<typeof ExpenseFormSchema>>({
@@ -85,7 +83,7 @@ export function ExpenseForm() {
         budgetClient.get(1, 1000, "active", "").then((budgetsPage) => setBudgets(budgetsPage.results))
     },[])
 
-    async function onSubmit(values: z.infer<typeof ExpenseFormSchema>) {
+    const onSubmit = useCallback(async (values: z.infer<typeof ExpenseFormSchema>) => {
         try {
             if (isEdit) {
                 await expenseClient.update(id!, values)
@@ -99,7 +97,7 @@ export function ExpenseForm() {
             toast.error("Erro ao salvar a receita. Verifique os dados.")
             console.error(err)
         }
-    }
+    }, [id, isEdit, navigate]);
 
     const watchType = form.watch("type")
 
@@ -445,3 +443,5 @@ export function ExpenseForm() {
         </div>
     )
 }
+
+export default memo(ExpenseForm);

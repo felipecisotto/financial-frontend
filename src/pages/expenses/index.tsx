@@ -7,11 +7,10 @@ import { PaginationState } from "@tanstack/react-table";
 
 import { toast } from "sonner";
 import { columns } from "./columns";
-import ExpenseClient from "@/clients/expense";
+import { expenseClient } from "@/lib/api-clients";
 import { Expense } from "@/types/expense";
 
 export default function Expenses() {
-    const expenseClient = new ExpenseClient();
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,

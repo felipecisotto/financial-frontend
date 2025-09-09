@@ -2,7 +2,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { columns } from "./columns";
 import Title from "@/components/ui/title";
 import { Link, useNavigate } from "react-router-dom";
-import BudgetClient from "@/clients/budget";
+import { budgetClient } from "@/lib/api-clients";
 import { useEffect, useState } from "react";
 import { Budget } from "@/types/budget";
 import Page from "@/types/page";
@@ -10,7 +10,6 @@ import { PaginationState } from "@tanstack/react-table";
 import { toast } from "sonner";
 
 export default function Budgets() {
-    const budgetClient = new BudgetClient();
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,

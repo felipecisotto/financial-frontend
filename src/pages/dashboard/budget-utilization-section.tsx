@@ -4,10 +4,10 @@ import {Bar, BarChart, CartesianGrid, Cell, LabelList, Pie, PieChart, XAxis, YAx
 
 import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card"
 import {ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent,} from "@/components/ui/chart"
-import {ReactElement, useEffect, useState} from 'react';
+import {ReactElement, useEffect, useState, useMemo} from 'react';
 import {toast} from 'sonner';
 import {BudgetUsage} from '@/types/budget.ts';
-import DashboardClient from '@/clients/Dashboard.ts';
+import { dashboardClient } from '@/lib/api-clients';
 import {Skeleton} from '@/components/ui/skeleton.tsx';
 
 const processChartData = (data: BudgetUsage[]) => {
@@ -42,8 +42,8 @@ type props = {
 }
 
 function Content({budgetUtilization}: props) {
-    
-    const dynamicConfig: ChartConfig = {
+    // Memoize chart configuration to avoid recreation
+    const dynamicConfig: ChartConfig = useMemo(() => ({
         remaining: {
             label: "Utilização",
             color: "var(--primary)"
@@ -52,7 +52,10 @@ function Content({budgetUtilization}: props) {
             label: "Descrição",
             color: "var(--chart-1)"
         }
-    };
+    }), []);
+
+    // Memoize processed chart data
+    const processedChartData = useMemo(() => processChartData(budgetUtilization), [budgetUtilization]);
     
     return (
         <div
@@ -132,7 +135,7 @@ function Content({budgetUtilization}: props) {
                                 cursor={false}
                                 content={<ChartTooltipContent hideLabel/>}
                             />
-                            <Pie data={processChartData(budgetUtilization)} dataKey="remaining" nameKey="description"/>
+                            <Pie data={processedChartData} dataKey="remaining" nameKey="description"/>
                         </PieChart>
                     </ChartContainer>
                 </CardContent>
@@ -151,10 +154,9 @@ function CardSkeleton(): ReactElement {
 export function BudgetUtilizationSection() {
     const [budgetUtilization, setBudgetUtilization] = useState([] as BudgetUsage[]);
     const [isBudgetUtilizationLoading, setIsBudgetUtilizationLoading] = useState(true);
-    const dashboard = new DashboardClient()
     useEffect(() => {
         const date = new Date()
-        dashboard.getBudgetUsage(date.getMonth(), date.getFullYear())
+        dashboardClient.getBudgetUsage(date.getMonth(), date.getFullYear())
             .then((data) => {
                 // console.log(data)
                 setBudgetUtilization(data)
