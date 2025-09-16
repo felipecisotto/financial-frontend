@@ -17,32 +17,37 @@ import IncomeForm from './pages/income/form.tsx'
 import Expenses from './pages/expenses/index.tsx'
 import ExpenseForm from './pages/expenses/form.tsx'
 import { PWAProvider } from './components/PWAProvider'
+import { ChatWidget } from './components/chat-widget'
+import { ChatProvider } from './contexts/ChatContext'
 
 
 const Layout = () => {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <div className='m-8'>
-        <NavigationMenu>
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <Link to="/" className="navigation-menu-link">Ínicio</Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link to="/expenses" className="navigation-menu-link">Despesas</Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link to="/incomes" className="navigation-menu-link">Receitas</Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link to="/budgets" className="navigation-menu-link">Budgets</Link>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
-        <div className='mt-4'>
-          <Outlet />
+      <ChatProvider>
+        <div className='m-8'>
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <Link to="/" className="navigation-menu-link">Ínicio</Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/expenses" className="navigation-menu-link">Despesas</Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/incomes" className="navigation-menu-link">Receitas</Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/budgets" className="navigation-menu-link">Budgets</Link>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+          <div className='mt-4'>
+            <Outlet />
+          </div>
         </div>
-      </div>
+        <ChatWidget />
+      </ChatProvider>
     </ThemeProvider >
   )
 }
