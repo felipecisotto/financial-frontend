@@ -21,4 +21,8 @@ export default class DashboardClient extends Client {
                 .filter((budget: BudgetUsage) => budget.remaining > 0)
                 .sort((a: BudgetUsage, b: BudgetUsage) => b.remaining - a.remaining))
     }
+    
+    public getMonthlyEvolution(year: number): Promise<MonthEvolution> {
+        return this.instance.get(`/api/dashboard/monthly-evolution?year=${year}`).then(({data}) => data)
+    }
 }
