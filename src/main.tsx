@@ -19,6 +19,7 @@ import ExpenseForm from './pages/expenses/form.tsx'
 import { PWAProvider } from './components/PWAProvider'
 import { ChatWidget } from './components/chat-widget'
 import { ChatProvider } from './contexts/ChatContext'
+import { CommandPalette } from './components/command-palette'
 
 
 const Layout = () => {
@@ -47,6 +48,7 @@ const Layout = () => {
           </div>
         </div>
         <ChatWidget />
+        <CommandPalette />
       </ChatProvider>
     </ThemeProvider >
   )

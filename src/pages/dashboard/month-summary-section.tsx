@@ -1,29 +1,25 @@
-import { TrendingUp } from "lucide-react"
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from "@/components/ui/card"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent, } from "@/components/ui/chart"
 import { Skeleton } from '@/components/ui/skeleton.tsx';
-import { useState, useMemo } from "react"
+import {useState, useMemo, useEffect} from "react"
+import {dashboardClient} from '@/lib/api-clients.ts';
+import MonthlyEvolution from '@/types/MonthlyEvolution.ts';
 
-function Content(): React.ReactElement {
-    // Memoize static chart data and config to prevent recreation
-    const chartData = useMemo(() => [
-        { month: "January", desktop: 186, mobile: 80 },
-        { month: "February", desktop: 305, mobile: 200 },
-        { month: "March", desktop: 237, mobile: 120 },
-        { month: "April", desktop: 73, mobile: 190 },
-        { month: "May", desktop: 209, mobile: 130 },
-        { month: "June", desktop: 214, mobile: 140 },
-    ], []);
+type contentProps = {
+    chartData: MonthlyEvolution[];
+}
+
+function Content({chartData}: contentProps): React.ReactElement {
 
     const chartConfig = useMemo(() => ({
-        desktop: {
-            label: "Desktop",
-            color: "var(--chart-1)",
+        expense: {
+            label: "Despesas",
+            color: "hsl(0, 84%, 60%)",
         },
-        mobile: {
-            label: "Mobile",
+        income: {
+            label: "Receitas",
             color: "var(--chart-2)",
         },
     } satisfies ChartConfig), []);
@@ -31,11 +27,11 @@ function Content(): React.ReactElement {
         className="*:data-[slot=card]:shadow-xs px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card lg:px-6">
         <Card>
             <CardHeader>
-                <CardTitle>Line Chart - Multiple</CardTitle>
-                <CardDescription>January - June 2024</CardDescription>
+                <CardTitle>Evolução Mensal</CardTitle>
+                <CardDescription>Janeiro - Dezembro {(new Date()).getFullYear()}</CardDescription>
             </CardHeader>
             <CardContent>
-                <ChartContainer className="max-h-72 w-full" config={chartConfig}>
+                <ChartContainer className="h-72 w-full" config={chartConfig}>
                     <LineChart
                         accessibilityLayer
                         data={chartData}
@@ -43,6 +39,8 @@ function Content(): React.ReactElement {
                             left: 12,
                             right: 12,
                         }}
+                        width={undefined}
+                        height={undefined}
                     >
                         <CartesianGrid vertical={false} />
                         <XAxis
@@ -50,38 +48,30 @@ function Content(): React.ReactElement {
                             tickLine={false}
                             axisLine={false}
                             tickMargin={8}
-                            tickFormatter={(value) => value.slice(0, 3)}
+                            interval={0}
+                            tickFormatter={(value) => {
+                                const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+                                return months[value - 1] || "";
+                            }}
                         />
                         <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                         <Line
-                            dataKey="desktop"
+                            dataKey="expense"
                             type="monotone"
-                            stroke="var(--color-desktop)"
+                            stroke="var(--color-expense)"
                             strokeWidth={2}
                             dot={false}
                         />
                         <Line
-                            dataKey="mobile"
+                            dataKey="income"
                             type="monotone"
-                            stroke="var(--color-mobile)"
+                            stroke="var(--color-income)"
                             strokeWidth={2}
                             dot={false}
                         />
                     </LineChart>
                 </ChartContainer>
             </CardContent>
-            <CardFooter>
-                <div className="flex w-full items-start gap-2 text-sm">
-                    <div className="grid gap-2">
-                        <div className="flex items-center gap-2 font-medium leading-none">
-                            Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-                        </div>
-                        <div className="flex items-center gap-2 leading-none text-muted-foreground">
-                            Showing total visitors for the last 6 months
-                        </div>
-                    </div>
-                </div>
-            </CardFooter>
         </Card>
     </div>
 }
@@ -93,11 +83,20 @@ function SummarySkeleton(): React.ReactElement {
 }
 
 export function MonthSummarySection() {
-    const [isLoading] = useState(true);
-    // setIsLoading(false)
+    const [isLoading, setLoading] = useState(true);
+    const [data, setData] = useState<MonthlyEvolution[]>([]);
+    useEffect(() => {
+        const currentYear = new Date().getFullYear();
+        dashboardClient.getMonthlyEvolution(currentYear)
+            .then((data) => {
+                setData(data)
+                setLoading(false)
+            })
+
+    }, []);
     return (
         <>
-            {isLoading ? <SummarySkeleton /> : (<Content />)}
+            {isLoading ? <SummarySkeleton /> : (<Content chartData={data} />)}
         </>
     )
 }
