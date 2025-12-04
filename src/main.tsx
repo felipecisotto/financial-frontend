@@ -19,7 +19,7 @@ import ExpenseForm from './pages/expenses/form.tsx'
 import { PWAProvider } from './components/PWAProvider'
 import { ChatWidget } from './components/chat-widget'
 import { ChatProvider } from './contexts/ChatContext'
-import { CommandPalette } from './components/command-palette'
+import { CommandPalette, CommandPaletteButton } from './components/command-palette'
 
 
 const Layout = () => {
@@ -27,22 +27,25 @@ const Layout = () => {
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <ChatProvider>
         <div className='m-8'>
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <Link to="/" className="navigation-menu-link">Ínicio</Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link to="/expenses" className="navigation-menu-link">Despesas</Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link to="/incomes" className="navigation-menu-link">Receitas</Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link to="/budgets" className="navigation-menu-link">Budgets</Link>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
+          <div className="flex items-center justify-between mb-4">
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <Link to="/" className="navigation-menu-link">Ínicio</Link>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <Link to="/expenses" className="navigation-menu-link">Despesas</Link>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <Link to="/incomes" className="navigation-menu-link">Receitas</Link>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <Link to="/budgets" className="navigation-menu-link">Budgets</Link>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+            <CommandPaletteButton />
+          </div>
           <div className='mt-4'>
             <Outlet />
           </div>
