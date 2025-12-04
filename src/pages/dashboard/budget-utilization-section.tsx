@@ -64,7 +64,7 @@ function Content({budgetUtilization}: props) {
                     <CardDescription>Top 5 mais utilizados</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <ChartContainer className="max-h-92 w-full" config={dynamicConfig}>
+                    <ChartContainer className="h-92 w-full" config={dynamicConfig}>
                         <BarChart
                             accessibilityLayer
                             data={budgetUtilization}
@@ -72,6 +72,8 @@ function Content({budgetUtilization}: props) {
                             margin={{
                                 right: 16,
                             }}
+                            width={undefined}
+                            height={undefined}
                         >
                             <CartesianGrid horizontal={false}/>
                             <YAxis
@@ -126,9 +128,9 @@ function Content({budgetUtilization}: props) {
                 <CardContent className="flex-1 pb-0">
                     <ChartContainer
                         config={dynamicConfig}
-                        className="mx-auto aspect-square max-h-80"
+                        className="mx-auto h-80 w-80"
                     >
-                        <PieChart>
+                        <PieChart width={undefined} height={undefined}>
                             <ChartTooltip
                                 cursor={false}
                                 content={<ChartTooltipContent hideLabel/>}

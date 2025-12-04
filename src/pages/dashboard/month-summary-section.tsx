@@ -1,7 +1,6 @@
-import { TrendingUp } from "lucide-react"
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from "@/components/ui/card"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent, } from "@/components/ui/chart"
 import { Skeleton } from '@/components/ui/skeleton.tsx';
 import {useState, useMemo, useEffect} from "react"
@@ -32,7 +31,7 @@ function Content({chartData}: contentProps): React.ReactElement {
                 <CardDescription>Janeiro - Dezembro {(new Date()).getFullYear()}</CardDescription>
             </CardHeader>
             <CardContent>
-                <ChartContainer className="max-h-72 w-full" config={chartConfig}>
+                <ChartContainer className="h-72 w-full" config={chartConfig}>
                     <LineChart
                         accessibilityLayer
                         data={chartData}
@@ -40,6 +39,8 @@ function Content({chartData}: contentProps): React.ReactElement {
                             left: 12,
                             right: 12,
                         }}
+                        width={undefined}
+                        height={undefined}
                     >
                         <CartesianGrid vertical={false} />
                         <XAxis
@@ -86,12 +87,12 @@ export function MonthSummarySection() {
     const [data, setData] = useState<MonthlyEvolution[]>([]);
     useEffect(() => {
         const currentYear = new Date().getFullYear();
-        const data = dashboardClient.getMonthlyEvolution(currentYear)
+        dashboardClient.getMonthlyEvolution(currentYear)
             .then((data) => {
                 setData(data)
                 setLoading(false)
             })
-        
+
     }, []);
     return (
         <>

@@ -1,6 +1,7 @@
 import Client from '@/clients/client.ts';
 import MonthSummary from '@/types/MonthSummary.ts';
 import {BudgetUsage} from '@/types/budget.ts';
+import MonthlyEvolution from '@/types/MonthlyEvolution.ts';
 
 export default class DashboardClient extends Client {
     constructor() {
@@ -22,7 +23,7 @@ export default class DashboardClient extends Client {
                 .sort((a: BudgetUsage, b: BudgetUsage) => b.remaining - a.remaining))
     }
     
-    public getMonthlyEvolution(year: number): Promise<MonthEvolution> {
+    public getMonthlyEvolution(year: number): Promise<MonthlyEvolution[]> {
         return this.instance.get(`/api/dashboard/monthly-evolution?year=${year}`).then(({data}) => data)
     }
 }
