@@ -2,6 +2,10 @@ import ReportAction from "@/components/ui/report-action"
 import { ColumnDef } from "@tanstack/react-table"
 import { createFormattedColumn } from "@/lib/table-utils" // ou onde você salvar
 import { Income } from "@/types/income"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { DollarSign, TrendingUp } from "lucide-react"
+import { Link } from "react-router-dom"
 
 interface Props {
     editAction: (incoming: Income) => void
@@ -43,6 +47,30 @@ export function columns({ editAction, deleteAction }: Props): ColumnDef<Income>[
                     className={`truncate overflow-hidden whitespace-nowrap text-right max-w-[180px]`}>
                     {formattedValue}
                 </div>
+            },
+        },
+        {
+            id: "salary",
+            header: "Detalhamento",
+            cell: ({ row }) => {
+                const income = row.original
+                if (income.hasSalaryTracking) {
+                    return (
+                        <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="gap-1">
+                                <DollarSign className="h-3 w-3" />
+                                {income.discountMode === "CLT" ? "CLT" : "Custom"}
+                            </Badge>
+                            <Link to={`/income/${income.id}/salary`}>
+                                <Button variant="ghost" size="sm" className="h-7 gap-1">
+                                    <TrendingUp className="h-3 w-3" />
+                                    Ver
+                                </Button>
+                            </Link>
+                        </div>
+                    )
+                }
+                return <span className="text-muted-foreground text-sm">-</span>
             },
         },
         {

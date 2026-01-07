@@ -7,8 +7,11 @@ export const IncomeFormSchema = z.object({
     type: z.string(),
     dueDay: z.coerce.number().optional(),
     endDate: z.date().optional(),
-    startDate: z.date()
+    startDate: z.date(),
+    // Salary tracking fields
+    discountMode: z.enum(["CLT", "custom"]).optional(),
+    hourlyRate: z.coerce.number().optional(),
+    hasSalaryTracking: z.boolean().optional(),
 });
-
 
 export type Income = z.infer<typeof IncomeFormSchema>;

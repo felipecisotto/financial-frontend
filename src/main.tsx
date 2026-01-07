@@ -14,6 +14,7 @@ import BudgetForm from './pages/budget/form.tsx'
 import { Toaster } from 'sonner'
 import Incomes from './pages/income/index.tsx'
 import IncomeForm from './pages/income/form.tsx'
+import SalaryDetails from './pages/income/salary.tsx'
 import Expenses from './pages/expenses/index.tsx'
 import ExpenseForm from './pages/expenses/form.tsx'
 import { PWAProvider } from './components/PWAProvider'
@@ -89,6 +90,10 @@ const router = createBrowserRouter([
       {
         path: "/income",
         element: <IncomeForm />
+      },
+      {
+        path: "/income/:id/salary",
+        element: <SalaryDetails />
       },
       {
         path: "/expenses",

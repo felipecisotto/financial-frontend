@@ -6,7 +6,8 @@ import {
     FormField,
     FormItem,
     FormLabel,
-    FormMessage
+    FormMessage,
+    FormDescription
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import Title from "@/components/ui/title"
@@ -26,6 +27,8 @@ import { cn } from "@/lib/utils"
 import { CalendarIcon } from "lucide-react"
 import { ptBR } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
+import { Switch } from "@/components/ui/switch"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 function IncomeForm() {
     const form = useForm<z.infer<typeof IncomeFormSchema>>({
@@ -33,9 +36,12 @@ function IncomeForm() {
         defaultValues: {
             description: "",
             amount: 0,
-            startDate: new Date()
+            startDate: new Date(),
+            hasSalaryTracking: false
         }
     })
+
+    const [enableSalaryTracking, setEnableSalaryTracking] = useState(false)
 
     const { id } = useParams()
     const isEdit = Boolean(id)
@@ -56,7 +62,11 @@ function IncomeForm() {
                     type: income.type,
                     startDate: income.startDate,
                     endDate: income.endDate,
+                    discountMode: income.discountMode,
+                    hourlyRate: income.hourlyRate,
+                    hasSalaryTracking: income.hasSalaryTracking
                 })
+                setEnableSalaryTracking(income.hasSalaryTracking || false)
             } catch (err) {
                 console.error("Erro ao buscar orçamento:", err)
             } finally {
@@ -263,7 +273,99 @@ function IncomeForm() {
                                 </FormItem>
                             )} />
 
+                        {/* Salary Tracking Section */}
+                        <Card className="border-dashed">
+                            <CardHeader>
+                                <CardTitle className="text-lg">Detalhamento Salarial</CardTitle>
+                                <CardDescription>
+                                    Ative para rastrear horas extras, sobreaviso e descontos (INSS, IRRF, etc)
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <FormField
+                                    control={form.control}
+                                    name="hasSalaryTracking"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                                            <div className="space-y-0.5">
+                                                <FormLabel className="text-base">
+                                                    Ativar rastreamento salarial
+                                                </FormLabel>
+                                                <FormDescription>
+                                                    Permite adicionar movimentações mensais como horas extras e descontos
+                                                </FormDescription>
+                                            </div>
+                                            <FormControl>
+                                                <Switch
+                                                    checked={field.value}
+                                                    onCheckedChange={(checked: boolean) => {
+                                                        field.onChange(checked)
+                                                        setEnableSalaryTracking(checked)
+                                                        if (!checked) {
+                                                            form.setValue("discountMode", undefined)
+                                                            form.setValue("hourlyRate", undefined)
+                                                        }
+                                                    }}
+                                                />
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
 
+                                {enableSalaryTracking && (
+                                    <>
+                                        <FormField
+                                            control={form.control}
+                                            name="discountMode"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Modo de Desconto</FormLabel>
+                                                    <Select onValueChange={field.onChange} value={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger className="w-full">
+                                                                <SelectValue placeholder="Selecione o modo de desconto" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="CLT">CLT (INSS + IRRF automático)</SelectItem>
+                                                            <SelectItem value="custom">Personalizado</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormDescription>
+                                                        CLT calcula automaticamente INSS e IRRF segundo legislação brasileira
+                                                    </FormDescription>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        <FormField
+                                            control={form.control}
+                                            name="hourlyRate"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Valor/Hora (R$)</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            type="number"
+                                                            min={0}
+                                                            step={0.01}
+                                                            placeholder="Ex: 30.00"
+                                                            {...field}
+                                                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                                                        />
+                                                    </FormControl>
+                                                    <FormDescription>
+                                                        Usado para calcular horas extras e sobreaviso
+                                                    </FormDescription>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </>
+                                )}
+                            </CardContent>
+                        </Card>
 
                         <div className="flex justify-end">
                             <Button
